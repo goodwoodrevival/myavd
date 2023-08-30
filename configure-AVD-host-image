@@ -1,0 +1,21 @@
+#Run the following to perform per-machine installation of OneDrive
+Start-Process -FilePath 'C:\Allfiles\Labs\02\x64\Release\FSLogixAppsSetup.exe' -ArgumentList '/quiet' -Wait
+#Run the following to prepare for per-machine installation of Microsoft Teams
+reg add "HKLM\Software\Microsoft\Teams" /v IsWVDEnvironment /t REG_DWORD /d 1 /f
+#Run the following to perform installation of Microsoft Visual C++ Redistributable
+C:\Allfiles\Labs\02\vc_redist.x64.exe /install /passive /norestart /log C:\Allfiles\Labs\02\vc_redist.log
+#Run the following to install Microsoft Edge Chromium (for learning purposes, since Edge is already present on the image used for this lab)
+Start-BitsTransfer -Source "https://aka.ms/edge-msi" -Destination 'C:\Allfiles\Labs\02\MicrosoftEdgeEnterpriseX64.msi'
+Start-Process -Wait -Filepath msiexec.exe -Argumentlist "/i C:\Allfiles\Labs\02\MicrosoftEdgeEnterpriseX64.msi /q"
+#Run the following to disable Automatic Updates
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate /t REG_DWORD /d 1 /f
+#Run the following to disable Storage Sense
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy" /v 01 /t REG_DWORD /d 0 /f
+#Run the following to configure time zone redirection
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v fEnableTimeZoneRedirection /t REG_DWORD /d 1 /f
+#Run the following to disable feedback hub collection of telemetry data
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f
+#Run the Disk Cleanup utility and click OK once completed
+cleanmgr /d C: /verylowdisk
+#Run the sysprep utility in order to prepare the operating system for generating an image and automatically shut it down
+C:\Windows\System32\Sysprep\sysprep.exe /oobe /generalize /shutdown /mode:vm
